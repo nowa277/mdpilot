@@ -32,7 +32,7 @@
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![AMBER](https://img.shields.io/badge/AMBER-24-orange?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48dGV4dCB4PSIyIiB5PSIxMiIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiPkE8L3RleHQ+PC9zdmc+)](https://ambermd.org)
 [![AlphaFold2](https://img.shields.io/badge/AlphaFold2-2.4+-4285F4?logo=google&logoColor=white)](https://github.com/google-deepmind/alphafold)
-[![BioReason](https://img.shields.io/badge/BioReason-Agent-8B5CF6)](https://github.com/nowa277/mdpilot)
+[![BioReason](https://img.shields.io/badge/BioReason-goGPT-8B5CF6)](https://github.com/bowang-lab/BioReason-Pro)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
 An intelligent multi-agent system that automates AMBER molecular dynamics simulations,
