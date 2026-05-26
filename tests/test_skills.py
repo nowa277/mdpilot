@@ -222,3 +222,151 @@ class TestContextUpdate:
             ctx.update_system_prompt("Base prompt\n\n" + skill_ctx)
         msgs = ctx.messages
         assert "Protein MD Setup" in msgs[0]["content"]
+
+
+# ------------------------------------------------------------------ #
+# Unit tests — SkillMeta + UnifiedSkillRegistry
+# ------------------------------------------------------------------ #
+
+
+class TestSkillMeta:
+    def test_from_frontmatter_file(self, tmp_path: Path):
+        from mdpilot.agent.skills import SkillMeta, UnifiedSkillRegistry
+        f = tmp_path / "test-skill.md"
+        f.write_text(
+            "---\n"
+            "title: Test Skill\n"
+            "description: A test skill for unit tests\n"
+            "tags: [test, unit]\n"
+            "triggers: [test trigger, unit test]\n"
+            "---\n"
+            "# Test Skill\n\nFull body content here.\n"
+        )
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        meta = reg.get("test-skill")
+        assert meta is not None
+        assert meta.title == "Test Skill"
+        assert meta.description == "A test skill for unit tests"
+        assert "test" in meta.tags
+        assert "test trigger" in meta.triggers
+        assert meta.source == "user"
+
+    def test_load_l2(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        f = tmp_path / "my-skill.md"
+        f.write_text(
+            "---\ntitle: My Skill\n---\n# My Skill\n\nDetailed instructions.\n"
+        )
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        l2 = reg.load_l2("my-skill")
+        assert l2 is not None
+        assert "Detailed instructions." in l2
+
+    def test_load_l2_caches(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        f = tmp_path / "cached.md"
+        f.write_text("---\ntitle: Cached\n---\nBody content.\n")
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        l2a = reg.load_l2("cached")
+        l2b = reg.load_l2("cached")
+        assert l2a == l2b
+
+
+class TestUnifiedSkillRegistry:
+    def _make_skills_dir(self, tmp_path: Path) -> Path:
+        d = tmp_path / "skills"
+        d.mkdir()
+        (d / "protein-md.md").write_text(
+            "---\n"
+            "title: Protein MD Setup\n"
+            "description: Set up protein molecular dynamics simulations\n"
+            "tags: [protein, md, simulation]\n"
+            "triggers: [protein simulation, MD setup, protein dynamics]\n"
+            "---\n"
+            "# Protein MD Setup\n\nSteps for setting up a protein MD simulation.\n"
+        )
+        (d / "ligand-param.md").write_text(
+            "---\n"
+            "title: Ligand Parameterization\n"
+            "description: Parameterize small molecule ligands\n"
+            "tags: [ligand, antechamber]\n"
+            "triggers: [ligand parameterization, small molecule]\n"
+            "---\n"
+            "# Ligand Parameterization\n\nUse antechamber.\n"
+        )
+        (d / "empty.md").write_text("")
+        return d
+
+    def test_discover_all(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        skills = reg.list_skills()
+        names = [s.name for s in skills]
+        assert "protein-md" in names
+        assert "ligand-param" in names
+        assert "empty" not in names
+
+    def test_search_relevance(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        results = reg.search("protein simulation setup")
+        assert len(results) > 0
+        assert results[0][0].name == "protein-md"
+
+    def test_build_context_with_active_skills(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        ctx = reg.build_context("hello", active_skills=["ligand-param"])
+        assert "Ligand Parameterization" in ctx
+        assert "Active Skills" in ctx
+
+    def test_build_context_auto_match_excludes_active(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        ctx = reg.build_context("protein simulation", active_skills=["protein-md"])
+        # protein-md appears in Active Skills, not duplicated in Auto-matched
+        assert "## Active Skills" in ctx
+        if "## Auto-matched Skills" in ctx:
+            auto_section = ctx.split("## Auto-matched Skills")[1]
+            assert "Protein MD Setup" not in auto_section
+
+    def test_list_skills_sorted(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        names = [s.name for s in reg.list_skills()]
+        assert names == sorted(names)
+
+    def test_get_nonexistent(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        assert reg.get("nope") is None
+
+    def test_load_l2_nonexistent(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        assert reg.load_l2("nope") is None
+
+    def test_count(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        d = self._make_skills_dir(tmp_path)
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[d])
+        # At least the 2 skills from our test dir (may include builtin ones too)
+        assert reg.count >= 2
+        assert reg.get("protein-md") is not None
+        assert reg.get("ligand-param") is not None

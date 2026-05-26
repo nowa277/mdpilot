@@ -252,3 +252,230 @@ class SkillRegistry:
     def count(self) -> int:
         """Number of loaded skills."""
         return len(self._skills)
+
+
+@dataclass
+class SkillMeta:
+    """L1 metadata for a skill — always loaded at startup."""
+
+    name: str
+    title: str
+    description: str
+    tags: list[str] = field(default_factory=list)
+    triggers: list[str] = field(default_factory=list)
+    source: str = "user"
+    file_path: Path | None = None
+    _l2_cache: str | None = field(default=None, repr=False)
+
+    def matches(self, query: str) -> float:
+        """Score relevance using keyword overlap."""
+        query_lower = query.lower()
+        query_words = set(re.findall(r"\w+", query_lower))
+
+        trigger_words: set[str] = set()
+        for t in self.triggers:
+            trigger_words.update(re.findall(r"\w+", t.lower()))
+
+        if trigger_words & query_words:
+            overlap = len(trigger_words & query_words) / max(len(trigger_words), 1)
+            return min(1.0, 0.5 + overlap)
+
+        tag_words: set[str] = set()
+        for t in self.tags:
+            tag_words.update(re.findall(r"\w+", t.lower()))
+
+        tag_overlap = tag_words & query_words
+        if tag_overlap:
+            return 0.3 + 0.2 * len(tag_overlap) / max(len(tag_words), 1)
+
+        title_words = set(re.findall(r"\w+", self.title.lower()))
+        title_overlap = title_words & query_words
+        if title_overlap:
+            return 0.2 + 0.1 * len(title_overlap) / max(len(title_words), 1)
+
+        desc_words = set(re.findall(r"\w+", self.description.lower()[:300]))
+        desc_overlap = desc_words & query_words
+        if desc_overlap:
+            return 0.1 * len(desc_overlap) / max(len(desc_words), 1)
+
+        return 0.0
+
+
+class UnifiedSkillRegistry:
+    """Unified skill registry with L1/L2 progressive disclosure.
+
+    Merges builtin skills (from tools/builtin/) and user skills
+    (from .mdpilot/skills/). Only loads L1 metadata at startup;
+    L2 content is loaded on demand via ``load_l2()``.
+    """
+
+    def __init__(self) -> None:
+        self._skills: dict[str, SkillMeta] = {}
+
+    def discover_all(self, extra_dirs: list[Path] | None = None) -> int:
+        """Scan builtin + user + extra directories for L1 metadata.
+
+        Returns the total number of skills registered.
+        """
+        count = 0
+
+        # Source 1: builtin directory (same path as SkillLoader)
+        builtin_dir = Path(__file__).resolve().parent.parent / "tools" / "builtin"
+        if builtin_dir.is_dir():
+            count += self._scan_dir(builtin_dir, source="builtin")
+
+        # Source 2: project-level .mdpilot/skills/
+        project_skills = Path.cwd() / ".mdpilot" / "skills"
+        if project_skills.is_dir():
+            count += self._scan_dir(project_skills, source="user")
+
+        # Source 3: user-level ~/.mdpilot/skills/
+        user_skills = Path.home() / ".mdpilot" / "skills"
+        if user_skills.is_dir():
+            count += self._scan_dir(user_skills, source="user")
+
+        # Source 4: extra directories (for testing or plugin injection)
+        for d in (extra_dirs or []):
+            d = Path(d)
+            if d.is_dir():
+                count += self._scan_dir(d, source="user")
+
+        return count
+
+    def _scan_dir(self, directory: Path, source: str) -> int:
+        count = 0
+        for md_file in sorted(directory.rglob("*.md")):
+            try:
+                meta = self._load_l1(md_file, source)
+                if meta:
+                    # First registration wins (builtin takes priority)
+                    if meta.name not in self._skills:
+                        self._skills[meta.name] = meta
+                    count += 1
+            except Exception:
+                continue
+        return count
+
+    def _load_l1(self, path: Path, source: str) -> SkillMeta | None:
+        text = path.read_text(encoding="utf-8")
+        if not text.strip():
+            return None
+
+        meta_dict, content = _parse_frontmatter(text)
+        title = meta_dict.get("title", "") or _extract_title(content)
+        description = meta_dict.get("description", "")
+        name = path.stem.lower().replace(" ", "-")
+
+        tags = meta_dict.get("tags", [])
+        if isinstance(tags, str):
+            tags = [t.strip() for t in tags.split(",")]
+
+        triggers = meta_dict.get("triggers", [])
+        if isinstance(triggers, str):
+            triggers = [t.strip() for t in triggers.split(",")]
+
+        return SkillMeta(
+            name=name,
+            title=title,
+            description=description,
+            tags=tags,
+            triggers=triggers,
+            source=source,
+            file_path=path,
+        )
+
+    def list_skills(self) -> list[SkillMeta]:
+        return sorted(self._skills.values(), key=lambda s: s.name)
+
+    def get(self, name: str) -> SkillMeta | None:
+        return self._skills.get(name)
+
+    def load_l2(self, name: str) -> str | None:
+        """Load full L2 content for a skill (cached after first load)."""
+        meta = self._skills.get(name)
+        if meta is None:
+            return None
+        if meta._l2_cache is not None:
+            return meta._l2_cache
+        if meta.file_path is None or not meta.file_path.is_file():
+            return None
+        try:
+            text = meta.file_path.read_text(encoding="utf-8")
+            _, body = _parse_frontmatter(text)
+            meta._l2_cache = body
+            return body
+        except Exception:
+            return None
+
+    def search(self, query: str, top_k: int = 3, min_score: float = 0.1) -> list[tuple[SkillMeta, float]]:
+        scored: list[tuple[SkillMeta, float]] = []
+        for skill in self._skills.values():
+            score = skill.matches(query)
+            if score >= min_score:
+                scored.append((skill, score))
+        scored.sort(key=lambda x: x[1], reverse=True)
+        return scored[:top_k]
+
+    def build_context(
+        self,
+        query: str,
+        active_skills: list[str] | None = None,
+        max_chars: int = 4000,
+    ) -> str:
+        """Build context string from active + auto-matched skills."""
+        parts: list[str] = []
+        total = 0
+        active_names = set(active_skills or [])
+        loaded_names: set[str] = set()
+
+        # Priority 1: active skills (forced injection)
+        if active_names:
+            active_parts: list[str] = []
+            for name in active_names:
+                l2 = self.load_l2(name)
+                meta = self.get(name)
+                if l2 and meta:
+                    section = f"### {meta.title}\n\n{l2}\n\n"
+                    if total + len(section) > max_chars:
+                        remaining = max_chars - total
+                        if remaining > 200:
+                            section = section[:remaining] + "\n...(truncated)\n\n"
+                        else:
+                            break
+                    active_parts.append(section)
+                    total += len(section)
+                    loaded_names.add(name)
+            if active_parts:
+                parts.append("## Active Skills\n\n" + "".join(active_parts))
+
+        # Priority 2: auto-matched skills (skip already-loaded)
+        matches = self.search(query, top_k=3, min_score=0.1)
+        auto_parts: list[str] = []
+        for skill, score in matches:
+            if skill.name in loaded_names:
+                continue
+            l2 = self.load_l2(skill.name)
+            if not l2:
+                continue
+            section = f"### {skill.title}\n\n{l2}\n\n"
+            if total + len(section) > max_chars:
+                remaining = max_chars - total
+                if remaining > 200:
+                    section = section[:remaining] + "\n...(truncated)\n\n"
+                else:
+                    break
+            auto_parts.append(section)
+            total += len(section)
+            loaded_names.add(skill.name)
+
+        if auto_parts:
+            parts.append("## Auto-matched Skills\n\n" + "".join(auto_parts))
+
+        if not parts:
+            return ""
+
+        return "# Relevant Knowledge\n\n" + "\n".join(parts)
+
+    @property
+    def count(self) -> int:
+        return len(self._skills)
