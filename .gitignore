@@ -72,6 +72,7 @@ docs/
 amber_test_from_lab03/
 bioreason&alphafpld2_configurations/
 knowledge/
+!src/mdpilot/knowledge/
 model/
 design-mockups/
 benchmarks/
@@ -81,3 +82,4 @@ diagnose_mdpilot.py
 start.sh
 healthcheck.sh
 CLAUDE.md
+.superpowers/

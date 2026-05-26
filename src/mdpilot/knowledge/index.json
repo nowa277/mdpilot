@@ -1,0 +1,130 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-05-11",
+  "categories": {
+    "tools": {
+      "description": "Documentation for computational tools and software",
+      "documents": [
+        {
+          "id": "alphafold2",
+          "title": "AlphaFold2 Integration",
+          "path": "alphafold2/README.md",
+          "keywords": [
+            "structure prediction",
+            "protein folding",
+            "deep learning",
+            "pLDDT",
+            "confidence scores",
+            "PDB",
+            "ESM",
+            "multimer"
+          ],
+          "use_cases": [
+            "Predict protein 3D structures from sequences",
+            "Generate initial structures for MD simulations",
+            "Assess structure quality with confidence scores",
+            "Predict protein complexes and multimers"
+          ],
+          "related": [
+            "bioreason",
+            "structure_preparation",
+            "md_setup"
+          ],
+          "sub_documents": [
+            {
+              "path": "alphafold2/installation.md",
+              "title": "AlphaFold2 Installation Guide",
+              "keywords": ["installation", "docker", "colab", "setup", "databases"]
+            },
+            {
+              "path": "alphafold2/api_reference.md",
+              "title": "AlphaFold2 API Reference",
+              "keywords": ["API", "Python", "batch processing", "integration"]
+            },
+            {
+              "path": "alphafold2/best_practices.md",
+              "title": "AlphaFold2 Best Practices",
+              "keywords": ["optimization", "troubleshooting", "quality assessment", "performance"]
+            }
+          ]
+        },
+        {
+          "id": "bioreason",
+          "title": "Bioreason (GogPT) Integration",
+          "path": "bioreason/README.md",
+          "keywords": [
+            "functional annotation",
+            "Gene Ontology",
+            "GO terms",
+            "ESM2",
+            "protein function",
+            "molecular function",
+            "biological process",
+            "cellular component"
+          ],
+          "use_cases": [
+            "Predict protein function from sequence",
+            "Annotate proteins with GO terms",
+            "Validate structure predictions with functional data",
+            "Inform MD simulation setup with functional annotations"
+          ],
+          "related": [
+            "alphafold2",
+            "functional_analysis",
+            "pathway_analysis"
+          ],
+          "sub_documents": [
+            {
+              "path": "bioreason/gogpt_architecture.md",
+              "title": "GogPT Architecture and ESM2",
+              "keywords": ["architecture", "ESM2", "transformer", "embeddings", "model"]
+            },
+            {
+              "path": "bioreason/api_usage.md",
+              "title": "GogPT API Usage",
+              "keywords": ["API", "Python", "batch processing", "predictions", "integration"]
+            },
+            {
+              "path": "bioreason/go_annotation.md",
+              "title": "Gene Ontology Annotation Guide",
+              "keywords": ["GO", "ontology", "MF", "BP", "CC", "annotation", "hierarchy"]
+            }
+          ]
+        }
+      ]
+    },
+    "concepts": {
+      "description": "Conceptual documentation and theoretical background",
+      "documents": []
+    },
+    "workflows": {
+      "description": "End-to-end workflow documentation",
+      "documents": [
+        {
+          "id": "structure_function_workflow",
+          "title": "Structure-Function Prediction Workflow",
+          "description": "Combined AlphaFold2 structure prediction and GogPT functional annotation",
+          "steps": [
+            "Input protein sequence",
+            "Run AlphaFold2 for structure prediction",
+            "Run GogPT for functional annotation",
+            "Validate structure-function consistency",
+            "Prepare for MD simulation based on function"
+          ],
+          "tools": ["alphafold2", "bioreason"],
+          "related": ["alphafold2", "bioreason"]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "total_documents": 2,
+    "total_sub_documents": 7,
+    "coverage": {
+      "structure_prediction": ["alphafold2"],
+      "functional_annotation": ["bioreason"],
+      "protein_language_models": ["bioreason"],
+      "md_preparation": ["alphafold2", "bioreason"]
+    }
+  }
+}
