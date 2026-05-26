@@ -19,7 +19,7 @@ import {
 } from './messages-cache';
 
 export interface AgentChatHandle {
-  send: (prompt: string) => void;
+  send: (prompt: string, activeSkills?: string[]) => void;
   stop: () => void;
   state: 'closed' | 'open';
 }
@@ -47,7 +47,7 @@ export function useAgentChat(chatId: ChatId | null): AgentChatHandle {
   }, [chatId, qc]);
 
   const send = useCallback(
-    (prompt: string) => {
+    (prompt: string, activeSkills?: string[]) => {
       if (!chatId || !prompt) return;
 
       const env = readEnv();
@@ -76,6 +76,7 @@ export function useAgentChat(chatId: ChatId | null): AgentChatHandle {
       mode: 'agent',
         manual_queue: manualQueue,
         enabled_tools: enabledTools,
+        ...(activeSkills && activeSkills.length > 0 ? { active_skills: activeSkills } : {}),
       };
 
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };

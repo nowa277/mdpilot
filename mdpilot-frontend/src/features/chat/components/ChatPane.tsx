@@ -21,7 +21,7 @@ export function ChatPane({ chatId }: Props) {
 
   // Agent mode: add user message to cache, then call agent.send with prompt string
   const sendAgent = useCallback(
-    (content: string) => {
+    (content: string, activeSkills?: string[]) => {
       const trimmed = content.trim();
       if (!trimmed) return;
       const id: MessageId = `local-${crypto.randomUUID()}`;
@@ -39,7 +39,7 @@ export function ChatPane({ chatId }: Props) {
           nextCursor: prev?.nextCursor ?? null,
       }),
       );
-      agent.send(trimmed);
+      agent.send(trimmed, activeSkills);
     },
     [chatId, qc, agent],
   );
