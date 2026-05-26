@@ -1,5 +1,5 @@
 import { api } from '@shared/api';
-import type { Chat, ChatId, ChatMessage } from '@shared/types';
+import type { Chat, ChatId, ChatMessage, SkillInfo } from '@shared/types';
 
 export async function fetchChats(): Promise<Chat[]> {
   const resp = await api().get<Chat[]>('/api/chats');
@@ -34,4 +34,9 @@ export async function updateChat(id: ChatId, patch: { title: string }): Promise<
 
 export async function deleteChat(id: ChatId): Promise<void> {
   await api().delete(`/api/chats/${encodeURIComponent(id)}`);
+}
+
+export async function fetchSkills(): Promise<SkillInfo[]> {
+  const resp = await api().get<SkillInfo[]>('/api/v1/skills');
+  return resp.data;
 }

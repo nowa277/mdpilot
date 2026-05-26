@@ -7,6 +7,7 @@ export type {
   MessageId,
   NodeStatus,
   Settings,
+  SkillInfo,
   Task,
   TaskId,
   TaskKind,

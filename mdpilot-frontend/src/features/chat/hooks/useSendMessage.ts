@@ -10,8 +10,8 @@ export interface SendMessageDeps {
 
 export function useSendMessage({ chatId, send }: SendMessageDeps) {
   const qc = useQueryClient();
-  return useCallback(
-    (content: string) => {
+  const sendMessage = useCallback(
+    (content: string, activeSkills?: string[]) => {
       const trimmed = content.trim();
       if (!trimmed) return;
       const id: MessageId = `local-${crypto.randomUUID()}`;
@@ -29,8 +29,16 @@ export function useSendMessage({ chatId, send }: SendMessageDeps) {
           nextCursor: prev?.nextCursor ?? null,
         }),
       );
-      send({ type: 'user_message', content: trimmed });
+      const payload: { type: string; content: string; active_skills?: string[] } = {
+        type: 'user_message',
+        content: trimmed,
+      };
+      if (activeSkills && activeSkills.length > 0) {
+        payload.active_skills = activeSkills;
+      }
+      send(payload);
     },
     [chatId, qc, send],
   );
+  return sendMessage;
 }

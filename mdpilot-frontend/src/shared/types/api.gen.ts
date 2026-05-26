@@ -113,6 +113,14 @@ export interface NodeStatus {
   lastSeen: string;
 }
 
+export interface SkillInfo {
+  name: string;
+  title: string;
+  description: string;
+  tags: string[];
+  source: string;
+}
+
 export interface Settings {
   llm: {
     endpoint: string;
