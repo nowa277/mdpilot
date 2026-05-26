@@ -1,0 +1,57 @@
+tool: sander
+display: "MD 模拟"
+description: "运行分子动力学模拟 (能量最小化/升温/平衡/成品)"
+
+steps:
+  - id: prmtop
+    type: file_picker
+    label: "选择拓扑文件 (prmtop)"
+    filter: "*.prmtop"
+    required: true
+
+  - id: inpcrd
+    type: file_picker
+    label: "选择坐标文件 (inpcrd/restart)"
+    filter: "*.inpcrd"
+    required: true
+
+  - id: run_type
+    type: single_select
+    label: "选择运行类型"
+    options:
+      - id: minimize
+        label: "能量最小化 (Minimization)"
+        value: "minimize"
+      - id: heating
+        label: "升温 (Heating)"
+        value: "heating"
+      - id: equilibration
+        label: "平衡 (Equilibration)"
+        value: "equilibration"
+      - id: production
+        label: "成品 MD (Production)"
+        value: "production"
+
+  - id: engine
+    type: single_select
+    label: "计算引擎"
+    options:
+      - id: auto
+        label: "自动选择 (优先 pmemd)"
+        value: "auto"
+      - id: sander
+        label: "强制 sander"
+        value: "sander"
+      - id: pmemd
+        label: "强制 pmemd"
+        value: "pmemd"
+
+  - id: nproc
+    type: text_input
+    label: "MPI 进程数"
+    default: "1"
+    hint: "仅 pmemd.MPI 有效"
+
+  - id: confirm
+    type: command_preview
+    label: "确认执行"

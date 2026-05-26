@@ -1,0 +1,66 @@
+tool: antechamber
+display: "配体参数化"
+description: "使用 antechamber 进行小分子参数化"
+
+steps:
+  - id: input_file
+    type: file_picker
+    label: "选择输入分子文件"
+    filter: "*.mol2,*.sdf,*.pdb"
+    required: true
+
+  - id: input_format
+    type: single_select
+    label: "输入文件格式"
+    options:
+      - id: auto
+        label: "自动检测"
+        value: "auto"
+      - id: mol2
+        label: "mol2"
+        value: "mol2"
+      - id: sdf
+        label: "sdf"
+        value: "sdf"
+      - id: pdb
+        label: "pdb"
+        value: "pdb"
+
+  - id: charge_method
+    type: single_select
+    label: "电荷计算方法"
+    options:
+      - id: bcc
+        label: "AM1-BCC (推荐)"
+        value: "bcc"
+      - id: gas
+        label: "Gasteiger"
+        value: "gas"
+      - id: resp
+        label: "RESP"
+        value: "resp"
+
+  - id: net_charge
+    type: text_input
+    label: "净电荷"
+    default: "0"
+
+  - id: atom_type
+    type: single_select
+    label: "原子类型"
+    options:
+      - id: gaff2
+        label: "GAFF2 (推荐)"
+        value: "gaff2"
+      - id: gaff
+        label: "GAFF"
+        value: "gaff"
+
+  - id: run_parmchk
+    type: toggle
+    label: "运行 parmchk2 生成 frcmod"
+    default: true
+
+  - id: confirm
+    type: command_preview
+    label: "确认执行"

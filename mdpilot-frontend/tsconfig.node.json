@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true,
+    "strict": true,
+    "allowJs": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "tailwind.config.ts", "postcss.config.js", "eslint.config.js"]
+}

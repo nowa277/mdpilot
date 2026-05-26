@@ -1,0 +1,8 @@
+source leaprc.protein.ff19SB
+source leaprc.water.opc3
+mol = loadPDB /home/user/obsidian/project/amber-agent/tests/test_output/1ubq/1UBQ_cleaned_pdb4amber.pdb
+solvateOct mol OPC3BOX 10.0
+addIons mol Cl- 0
+addIons mol Na+ 0
+saveAmberParm mol /home/user/obsidian/project/amber-agent/tests/test_output/1ubq/system.prmtop /home/user/obsidian/project/amber-agent/tests/test_output/1ubq/system.inpcrd
+quit

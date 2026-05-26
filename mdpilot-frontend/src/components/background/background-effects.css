@@ -1,0 +1,54 @@
+/* mdpilot-frontend/src/components/background/background-effects.css */
+
+/* 渐变光束动画 */
+.gradient-beams {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at center, rgba(255, 107, 157, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(0, 212, 255, 0.03) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 80%, rgba(255, 184, 77, 0.03) 0%, transparent 50%);
+  animation: rotateBeams 60s linear infinite;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes rotateBeams {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 有机Blob动画 */
+.organic-blob {
+  position: fixed;
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  filter: blur(60px);
+  opacity: 0.15;
+  animation: float 20s ease-in-out infinite;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.1);
+    border-radius: 50% 40% 60% 50% / 60% 30% 70% 40%;
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+    border-radius: 60% 50% 40% 60% / 50% 60% 30% 50%;
+  }
+}

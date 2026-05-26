@@ -1,0 +1,30 @@
+[
+  {
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "pdb",
+    "filename": "egfr_pred.pdb",
+    "sizeBytes": 412312,
+    "producedAt": "2026-05-14T08:02:30Z"
+  },
+  {
+  "chatId": "chat-egfr-erlotinib",
+    "kind": "csv",
+    "filename": "mmpbsa_results.csv",
+    "sizeBytes": 5840,
+    "producedAt": "2026-05-14T08:25:00Z"
+  },
+  {
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "png",
+    "filename": "rmsd_plot.png",
+    "sizeBytes": 92188,
+    "producedAt": "2026-05-14T08:23:00Z"
+  },
+  {
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "log",
+    "filename": "production.log",
+    "sizeBytes": 1204336,
+    "producedAt": "2026-05-14T08:18:00Z"
+  }
+]

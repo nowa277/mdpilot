@@ -1,0 +1,11 @@
+[
+  {
+    "id": "tc-egfr-1",
+    "messageId": "msg-egfr-2",
+    "tool": "amber.tleap",
+    "arguments": { "pdb": "1M17.pdb", "ligand": "ERL" },
+    "status": "succeeded",
+    "durationMs": 3200,
+    "output": { "topology": "complex.parm7" }
+  }
+]

@@ -1,0 +1,41 @@
+tool: pdb4amber
+display: "PDB 文件预处理"
+description: "清理和准备 PDB 文件用于 AMBER 模拟"
+
+steps:
+  - id: input_pdb
+    type: file_picker
+    label: "选择输入 PDB 文件"
+    filter: "*.pdb"
+    required: true
+
+  - id: operations
+    type: multi_select
+    label: "选择操作选项"
+    options:
+      - id: nohyd
+        label: "去除所有氢原子"
+        flag: "--nohyd"
+        value: true
+      - id: dry
+        label: "去除所有水分子"
+        flag: "--dry"
+        value: true
+      - id: reduce
+        label: "用 Reduce 添加氢原子"
+        flag: "--reduce"
+        value: true
+      - id: add_missing
+        label: "补全缺失重原子"
+        flag: "--add-missing-atoms"
+        value: true
+
+  - id: output
+    type: text_input
+    label: "输出文件名"
+    default: "{input_stem}_clean.pdb"
+    hint: "留空使用默认名"
+
+  - id: confirm
+    type: command_preview
+    label: "确认执行"

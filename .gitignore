@@ -1,0 +1,83 @@
+# ============================================================================
+# MDPilot .gitignore — strict, only essential source tracked
+# ============================================================================
+
+# ---- Everything not source code ----
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.bak
+*.log
+*.dat
+*.nc
+*.prmtop
+*.inpcrd
+*.pdb
+*.rst7
+*.mdcrd
+*.out
+*.sqm
+*.AC
+*.bin
+
+# Claude Code / IDE / tooling
+.claude/
+.superpowers/
+.vscode/
+.idea/
+.playwright-mcp/
+.codegraph/
+.vite/
+.mdpilot.yaml
+
+# Frontend build artifacts
+mdpilot-frontend/node_modules/
+mdpilot-frontend/dist/
+mdpilot-frontend/coverage/
+mdpilot-frontend/tsconfig.tsbuildinfo
+mdpilot-frontend/pnpm-debug.log
+
+# Frontend env (tokens/keys)
+mdpilot-frontend/.env
+mdpilot-frontend/.env.local
+mdpilot-frontend/.env.production
+mdpilot-frontend/.env.backup
+
+# Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+*.egg
+.venv*/
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Non-source directories
+reference/
+docs/
+amber_test_from_lab03/
+bioreason&alphafpld2_configurations/
+knowledge/
+model/
+design-mockups/
+benchmarks/
+
+# Root-level loose files that are not source
+diagnose_mdpilot.py
+start.sh
+healthcheck.sh
+CLAUDE.md

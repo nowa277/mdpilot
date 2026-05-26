@@ -1,0 +1,46 @@
+tool: cpptraj
+display: "轨迹分析"
+description: "运行 cpptraj 进行轨迹分析"
+
+steps:
+  - id: prmtop
+    type: file_picker
+    label: "选择拓扑文件 (prmtop)"
+    filter: "*.prmtop"
+    required: true
+
+  - id: trajectory
+    type: file_picker
+    label: "选择轨迹文件 (nc/mdcrd)"
+    filter: "*.nc,*.mdcrd"
+    required: true
+
+  - id: analysis
+    type: multi_select
+    label: "选择分析类型"
+    options:
+      - id: rmsd
+        label: "RMSD (均方根偏差)"
+        value: "rmsd"
+      - id: rmsf
+        label: "RMSF (均方根涨落)"
+        value: "rmsf"
+      - id: hbond
+        label: "氢键分析"
+        value: "hbond"
+      - id: distance
+        label: "距离/角度测量"
+        value: "distance"
+      - id: dihedral
+        label: "二面角分析"
+        value: "dihedral"
+      - id: cluster
+        label: "聚类分析"
+        value: "cluster"
+      - id: pca
+        label: "主成分分析 (PCA)"
+        value: "pca"
+
+  - id: confirm
+    type: command_preview
+    label: "确认执行"

@@ -1,0 +1,94 @@
+tool: tleap
+display: "系统构建"
+description: "使用 tLEaP 构建 AMBER 拓扑和坐标文件"
+
+steps:
+  - id: input_pdb
+    type: file_picker
+    label: "选择输入 PDB 文件"
+    filter: "*.pdb"
+    required: true
+
+  - id: forcefield
+    type: single_select
+    label: "选择力场"
+    options:
+      - id: ff19sb
+        label: "ff19SB (蛋白, 推荐)"
+        value: "leaprc.protein.ff19SB"
+      - id: ff14sb
+        label: "ff14SB (蛋白, 经典)"
+        value: "leaprc.protein.ff14SB"
+      - id: ff19sb_ol3
+        label: "ff19SB + OL3 (核酸)"
+        value: "leaprc.protein.ff19SB"
+      - id: gaff2
+        label: "GAFF2 (小分子/配体)"
+        value: "leaprc.gaff2"
+
+  - id: water_model
+    type: single_select
+    label: "选择水模型"
+    options:
+      - id: opc3
+        label: "OPC3 (推荐, 三点)"
+        value: "opc3"
+      - id: opc
+        label: "OPC (四点)"
+        value: "opc"
+      - id: tip3p
+        label: "TIP3P (经典)"
+        value: "tip3p"
+      - id: tip4pew
+        label: "TIP4P-EW"
+        value: "tip4pew"
+      - id: none
+        label: "无溶剂 (气相)"
+        value: "none"
+
+  - id: solvent_box
+    type: single_select
+    label: "水盒形状"
+    options:
+      - id: octahedron
+        label: "截断八面体 (推荐, solvateOct)"
+        value: "solvateoct"
+      - id: cubic
+        label: "立方体 (solvateBox)"
+        value: "solvatebox"
+    depends_on: water_model
+    show_when: "not:none"
+
+  - id: buffer_distance
+    type: text_input
+    label: "缓冲距离 (Å)"
+    default: "10.0"
+    hint: "溶质到水盒边缘的距离"
+    depends_on: water_model
+    show_when: "not:none"
+
+  - id: ligand_file
+    type: file_picker
+    label: "配体文件 (可选, mol2)"
+    filter: "*.mol2"
+    required: false
+    hint: "GAFF2 参数化的配体 mol2 文件"
+
+  - id: ligand_frcmod
+    type: file_picker
+    label: "配体 frcmod 文件 (可选)"
+    filter: "*frcmod*"
+    required: false
+    depends_on: ligand_file
+
+  - id: ion_concentration
+    type: text_input
+    label: "离子浓度 (M)"
+    default: "0.15"
+    hint: "添加 Na+ 和 Cl- 中和体系"
+    depends_on: water_model
+    show_when: "not:none"
+
+  - id: confirm
+    type: command_preview
+    label: "确认执行"

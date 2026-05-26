@@ -1,0 +1,53 @@
+[
+  {
+    "id": "task-egfr-prep",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "amber_md",
+    "status": "succeeded",
+    "progress": 100,
+    "startedAt": "2026-05-14T08:01:00Z",
+    "finishedAt": "2026-05-14T08:05:00Z"
+  },
+  {
+    "id": "task-egfr-mmpbsa",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "mmpbsa",
+    "status": "running",
+    "progress": 64,
+    "startedAt": "2026-05-14T08:20:00Z"
+  },
+  {
+    "id": "task-egfr-bioreason",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "bioreason",
+    "status": "running",
+    "progress": 32,
+    "startedAt": "2026-05-14T09:00:00Z"
+  },
+  {
+    "id": "task-egfr-alphafold",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "alphafold2",
+    "status": "pending",
+    "progress": 0
+  },
+  {
+    "id": "task-egfr-report",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "report",
+    "status": "failed",
+    "progress": 45,
+    "startedAt": "2026-05-14T07:30:00Z",
+    "finishedAt": "2026-05-14T07:35:00Z",
+    "error": "Report generation failed: template rendering error at section 3"
+  },
+  {
+    "id": "task-egfr-cancelled",
+    "chatId": "chat-egfr-erlotinib",
+    "kind": "amber_md",
+    "status": "cancelled",
+    "progress": 12,
+    "startedAt": "2026-05-14T06:00:00Z",
+    "finishedAt": "2026-05-14T06:02:00Z"
+  }
+]

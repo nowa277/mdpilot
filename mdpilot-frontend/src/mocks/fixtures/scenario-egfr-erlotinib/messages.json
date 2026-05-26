@@ -1,0 +1,16 @@
+[
+  {
+    "id": "msg-egfr-1",
+    "chatId": "chat-egfr-erlotinib",
+    "role": "user",
+    "content": "请基于 1M17 计算 EGFR 与厄洛替尼的 MMPBSA 结合自由能。",
+    "createdAt": "2026-05-14T08:00:05Z"
+  },
+  {
+    "id": "msg-egfr-2",
+    "chatId": "chat-egfr-erlotinib",
+    "role": "assistant",
+    "content": "我会按 7 步计划执行：结构准备 → 力场拓扑 → 能量最小化 → 平衡 → 生产 MD → 轨迹分析 → MMPBSA。",
+    "createdAt": "2026-05-14T08:00:08Z"
+  }
+]

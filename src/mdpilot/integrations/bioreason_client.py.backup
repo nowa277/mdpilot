@@ -1,0 +1,276 @@
+"""Bioreason client for protein function annotation using ESM2."""
+
+import asyncio
+import os
+import re
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+
+from mdpilot.integrations.base_client import ClientMode, ModelClient
+
+
+class BioreasonClient(ModelClient):
+    """Client for Bioreason protein function annotation.
+
+    Uses ESM2 (Evolutionary Scale Modeling) for protein embeddings
+    and GO (Gene Ontology) term prediction.
+    """
+
+    def __init__(self, config: Dict[str, Any]):
+        """Initialize Bioreason client.
+
+        Args:
+            config: Configuration dictionary with keys:
+                - mode: "local" or "api"
+                - local_path: Path to Bioreason installation (local mode)
+                - api_endpoint: API endpoint URL (api mode)
+                - api_key: API authentication key (api mode, optional)
+                - model_name: ESM2 model variant (default: "esm2_t33_650M_UR50D")
+        """
+        super().__init__(config)
+
+        if self.mode == ClientMode.LOCAL:
+            self.local_path = config["local_path"]
+            self.model_name = config.get("model_name", "esm2_t33_650M_UR50D")
+        else:
+            self.api_endpoint = config["api_endpoint"]
+            self.api_key = config.get("api_key")
+            self.model_name = config.get("model_name", "esm2_t33_650M_UR50D")
+
+    def _validate_config(self) -> None:
+        """Validate configuration based on mode."""
+        mode = self.config.get("mode", "").lower()
+
+        if mode == "local":
+            if "local_path" not in self.config:
+                raise ValueError("local_path is required for local mode")
+        elif mode == "api":
+            if "api_endpoint" not in self.config:
+                raise ValueError("api_endpoint is required for API mode")
+
+    async def health_check(self) -> Dict[str, Any]:
+        """Check if Bioreason is available and healthy.
+
+        Returns:
+            Dictionary with status, mode, and additional info
+        """
+        try:
+            if self.mode == ClientMode.LOCAL:
+                return await self._health_check_local()
+            else:
+                return await self._health_check_api()
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "mode": self.mode.value,
+                "error": str(e),
+            }
+
+    async def _health_check_local(self) -> Dict[str, Any]:
+        """Health check for local mode."""
+        if not os.path.exists(self.local_path):
+            return {
+                "status": "unhealthy",
+                "mode": "local",
+                "error": f"Bioreason path not found: {self.local_path}",
+            }
+
+        return {
+            "status": "healthy",
+            "mode": "local",
+            "local_path": self.local_path,
+            "model_name": self.model_name,
+        }
+
+    async def _health_check_api(self) -> Dict[str, Any]:
+        """Health check for API mode."""
+        headers = {}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{self.api_endpoint}/health", headers=headers, timeout=aiohttp.ClientTimeout(total=10)
+            ) as response:
+                if response.status == 200:
+                    return {
+                        "status": "healthy",
+                        "mode": "api",
+                        "api_endpoint": self.api_endpoint,
+                    }
+                else:
+                    return {
+                        "status": "unhealthy",
+                        "mode": "api",
+                        "error": f"API returned status {response.status}",
+                    }
+
+    async def annotate(self, sequence: str, **options) -> Dict[str, Any]:
+        """Annotate protein sequence with GO terms.
+
+        Args:
+            sequence: Amino acid sequence
+            **options: Additional annotation options:
+                - include_embeddings: Include ESM2 embeddings (default: False)
+                - confidence_threshold: Minimum confidence for GO terms (default: 0.5)
+
+        Returns:
+            Dictionary containing:
+                - go_terms: GO annotations by category (MF, BP, CC)
+                - embeddings: ESM2 embeddings (if requested)
+                - model: Model name used
+
+        Raises:
+            ValueError: If sequence is invalid
+            RuntimeError: If annotation fails
+        """
+        if not self._validate_sequence(sequence):
+            raise ValueError("Invalid sequence: must be non-empty and contain only valid amino acids")
+
+        if self.mode == ClientMode.LOCAL:
+            return await self._run_local_annotation(sequence, **options)
+        else:
+            return await self._run_api_annotation(sequence, **options)
+
+    async def get_embeddings(self, sequence: str) -> List[float]:
+        """Generate ESM2 embeddings for a protein sequence.
+
+        Args:
+            sequence: Amino acid sequence
+
+        Returns:
+            List of embedding values
+
+        Raises:
+            ValueError: If sequence is invalid
+        """
+        if not self._validate_sequence(sequence):
+            raise ValueError("Invalid sequence: must be non-empty and contain only valid amino acids")
+
+        return await self._generate_embeddings(sequence)
+
+    def _validate_sequence(self, sequence: str) -> bool:
+        """Validate amino acid sequence.
+
+        Args:
+            sequence: Amino acid sequence to validate
+
+        Returns:
+            True if valid, False otherwise
+        """
+        if not sequence:
+            return False
+
+        # Valid amino acid codes (20 standard + X for unknown)
+        valid_pattern = re.compile(r"^[ACDEFGHIKLMNPQRSTVWYX]+$", re.IGNORECASE)
+        return bool(valid_pattern.match(sequence))
+
+    def _parse_go_terms(
+        self, raw_terms: List[Dict[str, Any]], threshold: Optional[float] = None
+    ) -> List[Dict[str, Any]]:
+        """Parse and filter GO terms by confidence threshold.
+
+        Args:
+            raw_terms: List of GO term dictionaries
+            threshold: Minimum confidence score (optional)
+
+        Returns:
+            Filtered list of GO terms
+        """
+        if threshold is None:
+            return raw_terms
+
+        return [term for term in raw_terms if term.get("score", 0) >= threshold]
+
+    async def _run_local_annotation(self, sequence: str, **options) -> Dict[str, Any]:
+        """Run annotation using local Bioreason installation.
+
+        Args:
+            sequence: Amino acid sequence
+            **options: Annotation options
+
+        Returns:
+            Annotation results dictionary
+        """
+        include_embeddings = options.get("include_embeddings", False)
+        confidence_threshold = options.get("confidence_threshold", 0.5)
+
+        # Simulate running Bioreason locally
+        # In production, this would call the actual Bioreason binary
+        await asyncio.sleep(0.1)  # Simulate processing time
+
+        # Mock GO term annotations
+        go_terms = {
+            "molecular_function": [
+                {"id": "GO:0003824", "name": "catalytic activity", "score": 0.95},
+                {"id": "GO:0005515", "name": "protein binding", "score": 0.88},
+            ],
+            "biological_process": [
+                {"id": "GO:0008152", "name": "metabolic process", "score": 0.92},
+            ],
+            "cellular_component": [
+                {"id": "GO:0005737", "name": "cytoplasm", "score": 0.85},
+            ],
+        }
+
+        result = {
+            "go_terms": go_terms,
+            "model": self.model_name,
+        }
+
+        if include_embeddings:
+            result["embeddings"] = await self._generate_embeddings(sequence)
+
+        return result
+
+    async def _run_api_annotation(self, sequence: str, **options) -> Dict[str, Any]:
+        """Run annotation using API endpoint.
+
+        Args:
+            sequence: Amino acid sequence
+            **options: Annotation options
+
+        Returns:
+            Annotation results dictionary
+        """
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        payload = {
+            "sequence": sequence,
+            "model": self.model_name,
+            **options,
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{self.api_endpoint}/annotate",
+                json=payload,
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=120),  # 2 minutes for annotation
+            ) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise RuntimeError(f"API annotation failed: {error_text}")
+
+                result = await response.json()
+                return result
+
+    async def _generate_embeddings(self, sequence: str) -> List[float]:
+        """Generate ESM2 embeddings for sequence.
+
+        Args:
+            sequence: Amino acid sequence
+
+        Returns:
+            List of embedding values
+        """
+        # Simulate embedding generation
+        # In production, this would use the actual ESM2 model
+        await asyncio.sleep(0.05)
+
+        # ESM2 650M produces 1280-dimensional embeddings
+        embedding_dim = 1280
+        return [0.1] * embedding_dim

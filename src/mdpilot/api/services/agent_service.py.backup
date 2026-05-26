@@ -1,0 +1,142 @@
+"""Agent service - Bridge between API and ReActLoop"""
+import asyncio
+import itertools
+import re as _re
+from contextlib import suppress
+from typing import AsyncGenerator, Dict
+
+from mdpilot.agent.react import ReActLoop
+from mdpilot.agent.orchestrator import AgentOrchestrator
+from mdpilot.config.loader import load_config
+from mdpilot.agent.events import (
+    ITERATION_START, LLM_RESPONSE, TOOL_CALL,
+    TOOL_RESULT, LOOP_END, ERROR, PROGRESS_UPDATE
+)
+from mdpilot.database.session import get_session
+from mdpilot.database.repositories.session import SessionRepository
+
+
+class AgentService:
+    """Manage ReActLoop instances and handle event streaming"""
+
+    def __init__(self, max_concurrent: int = 5):
+        self.config = load_config()
+        self._agents: Dict[str, ReActLoop] = {}
+        self._concurrent_limit = asyncio.Semaphore(max_concurrent)
+
+    async def get_or_create_agent(self, session_id: str) -> ReActLoop:
+        """Get or create ReActLoop instance for session with DB persistence"""
+        if session_id in self._agents:
+            return self._agents[session_id]
+
+        async with get_session() as db:
+            repo = SessionRepository(db)
+            saved = await repo.load_session(session_id)
+
+            agent = ReActLoop(self.config, use_coordination=self.config.agent.use_coordination)
+
+            if saved:
+                agent._context._system_prompt = saved.system_prompt
+                agent._context._messages = saved.context_messages
+                agent._budget._iteration = saved.iteration_count
+                agent._budget._max_iterations = saved.max_iterations
+
+            self._agents[session_id] = agent
+            return agent
+
+    async def save_agent_state(self, session_id: str):
+        """Persist agent state to database"""
+        if session_id not in self._agents:
+            return
+
+        agent = self._agents[session_id]
+        async with get_session() as db:
+            repo = SessionRepository(db)
+            await repo.save_session(
+                session_id=session_id,
+                context_messages=agent._context._messages,
+                system_prompt=agent._context._system_prompt,
+                iteration_count=agent._budget._iteration,
+                max_iterations=agent._budget._max_iterations
+            )
+
+    async def execute_with_stream(
+        self,
+        session_id: str,
+        prompt: str,
+        mode: str = "agent",
+        manual_queue: list[dict] | None = None,
+        enabled_tools: list[str] | None = None,
+  ) -> AsyncGenerator[Dict, None]:
+        """Execute task and stream events in real-time with concurrency control"""
+        async with self._concurrent_limit:
+            agent = await self.get_or_create_agent(session_id)
+            event_queue = asyncio.Queue()
+
+            # Reset orchestrator state for this execution
+            self._orchestrator.reset()
+
+            # Wire orchestrator high-level events into the queue
+            self._orchestrator.on_high_level_event = event_queue.put_nowait
+
+            # Track tool_name -> tool_id for matching TOOL_RESULT to TOOL_CALL
+            _pending_tool_ids: Dict[str, str] = {}
+
+            def on_tool_call(e):
+                data = e.data or {}
+                tool_name = data.get("name", "unknown")
+                tool_id = f"tool-{next(self._tool_id_counter)}"
+                _pending_tool_ids[tool_name] = tool_id
+                arguments = data.get("arguments", {})
+                orchestrator.on_tool_call(tool_name, tool_id, arguments)
+
+            def on_tool_result(e):
+                data = e.data or {}
+                tool_name = data.get("name", "unknown")
+                tool_id = _pending_tool_ids.pop(tool_name, None)
+                if tool_id is None:
+                    return
+                output = data.get("output", "")
+                success = data.get("success", True)
+                self._orchestrator.on_tool_result(tool_id, str(output), success)
+
+            def on_passthrough(event_type: str, e):
+                event_queue.put_nowait({"type": event_type, "data": e.data})
+
+            agent.events.on(TOOL_CALL, on_tool_call)
+            agent.events.on(TOOL_RESULT, on_tool_result)
+            agent.events.on(ITERATION_START, lambda e: on_passthrough("iteration_start", e))
+            agent.events.on(LLM_RESPONSE, lambda e: on_passthrough("llm_response", e))
+            agent.events.on(LOOP_END, lambda e: on_passthrough("loop_end", e))
+            agent.events.on(ERROR, lambda e: on_passthrough("error", e))
+            agent.events.on(PROGRESS_UPDATE, lambda e: on_passthrough("progress_update", e))
+
+            task = asyncio.create_task(
+      agent.run(
+                 prompt,
+                  stream=True,
+               mode=mode,
+                    manual_queue=manual_queue or [],
+              enabled_tools=enabled_tools or [],
+        )
+      )
+            try:
+                while not task.done():
+                    try:
+                        event = await asyncio.wait_for(event_queue.get(), timeout=0.1)
+                        yield event
+                    except asyncio.TimeoutError:
+                        continue
+
+                result = await task
+                yield {"type": "complete", "data": {"result": result}}
+            finally:
+                if not task.done():
+                    task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await task
+
+    def cleanup_agent(self, session_id: str):
+        """Clean up agent instance"""
+        if session_id in self._agents:
+            del self._agents[session_id]

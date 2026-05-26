@@ -1,0 +1,61 @@
+/* mdpilot-frontend/src/styles/glassmorphism.css */
+
+/* 玻璃态面板 - 用于大面积背景 */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+/* 玻璃态卡片 - 用于内容卡片 */
+.glass-card {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transform: translateY(-2px);
+}
+
+/* 玻璃态输入框 */
+.glass-input {
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.glass-input:focus {
+  border-color: rgba(0, 212, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  outline: none;
+}
+
+/* 玻璃态按钮 */
+.glass-button {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.glass-button:hover {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: rgba(148, 163, 184, 0.4);
+  transform: translateY(-1px);
+}
+
+.glass-button:active {
+  transform: translateY(0);
+}

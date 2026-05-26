@@ -1,0 +1,16 @@
+[
+  {
+    "id": "msg-aspirin-1",
+    "chatId": "chat-aspirin-cox2",
+    "role": "user",
+    "content": "评估 Aspirin 与 COX2（PDB: 5KIR）的结合模式。",
+    "createdAt": "2026-05-13T14:00:05Z"
+  },
+  {
+    "id": "msg-aspirin-2",
+    "chatId": "chat-aspirin-cox2",
+    "role": "assistant",
+    "content": "好的，我先做结构对齐再跑短 MD 评估。",
+    "createdAt": "2026-05-13T14:00:09Z"
+  }
+]
