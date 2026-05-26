@@ -218,6 +218,7 @@ class AgentStreamRequest(BaseModel):
     mode: str = "agent"
     manual_queue: list[ManualQueueItem] = Field(default_factory=list)
     enabled_tools: list[str] = Field(default_factory=list)
+    active_skills: list[str] = Field(default_factory=list)
 
 
 def _sse(event_type: str, data: dict[str, Any]) -> str:
@@ -259,6 +260,7 @@ async def stream_agent_task(
                 mode=request.mode,
                 manual_queue=[item.model_dump() for item in request.manual_queue],
                 enabled_tools=request.enabled_tools,
+                active_skills=request.active_skills,
             ):
                 event_type = event.get("type", "message")
                 data = event.get("data", {})

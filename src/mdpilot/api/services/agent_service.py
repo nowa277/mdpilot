@@ -147,10 +147,12 @@ class AgentService:
         mode: str = "agent",
         manual_queue: list[dict] | None = None,
         enabled_tools: list[str] | None = None,
+        active_skills: list[str] | None = None,
     ) -> AsyncGenerator[Dict, None]:
         """Execute task and stream events in real-time with concurrency control"""
         async with self._concurrent_limit:
             agent = await self.get_or_create_agent(session_id, prompt=prompt)
+            agent._active_skills = active_skills
             event_queue = asyncio.Queue()
 
             # Per-session orchestrator — no shared state between sessions

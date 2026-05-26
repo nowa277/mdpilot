@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import mdpilot.database.models  # noqa: F401
 from mdpilot.api.config import Settings
 from mdpilot.api.middleware.logging import LoggingMiddleware
-from mdpilot.api.routers import agent, alphafold2, bioreason, chat, frontend, health, tasks
+from mdpilot.api.routers import agent, alphafold2, bioreason, chat, frontend, health, skills, tasks
 from mdpilot.api.websockets.chat import chat_websocket_endpoint
 from mdpilot.api.websockets.logs import logs_websocket_endpoint
 from mdpilot.config.logging import configure_logging
@@ -67,6 +67,7 @@ def create_app():
     fastapi_app.include_router(health.router)
     fastapi_app.include_router(bioreason.router)
     fastapi_app.include_router(alphafold2.router)
+    fastapi_app.include_router(skills.router)
     fastapi_app.include_router(agent.router)
     fastapi_app.include_router(frontend.router)
 
