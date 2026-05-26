@@ -80,6 +80,8 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
     """Parse YAML frontmatter from a Markdown string.
 
     Returns (metadata_dict, remaining_content).
+    Supports simple key: value, inline lists [a, b], and multi-line
+    list-of-dicts blocks (e.g. ``tools:`` with ``  - name: x, node: y``).
     """
     if not text.startswith("---"):
         return {}, text
@@ -92,19 +94,56 @@ def _parse_frontmatter(text: str) -> tuple[dict, str]:
     content = parts[2].strip()
 
     meta: dict = {}
+    current_list_key: str | None = None
+    current_list: list[dict] = []
+
     for line in yaml_text.splitlines():
-        line = line.strip()
-        if ":" in line:
-            key, _, value = line.partition(":")
+        stripped = line.strip()
+
+        # Detect list-of-dicts block header (e.g. "tools:")
+        if stripped.endswith(":") and not stripped.startswith("-"):
+            if current_list_key and current_list:
+                meta[current_list_key] = current_list
+            current_list_key = stripped.rstrip(":").strip()
+            current_list = []
+            continue
+
+        # Parse list item (e.g. "  - name: pdb4amber, node: lab03, exec: ...")
+        if stripped.startswith("- ") and current_list_key:
+            item_str = stripped[2:].strip()
+            item: dict = {}
+            if ":" in item_str:
+                for part in item_str.split(","):
+                    part = part.strip()
+                    if ":" in part:
+                        k, _, v = part.partition(":")
+                        item[k.strip()] = v.strip().strip('"').strip("'")
+            if item:
+                current_list.append(item)
+            continue
+
+        # Non-list line: flush any active list block
+        if current_list_key:
+            if current_list:
+                meta[current_list_key] = current_list
+            current_list_key = None
+            current_list = []
+
+        # Simple key: value (including inline lists)
+        if ":" in stripped:
+            key, _, value = stripped.partition(":")
             key = key.strip()
             value = value.strip().strip('"').strip("'")
             if key and value:
-                # Handle list values
                 if value.startswith("[") and value.endswith("]"):
                     items = [v.strip().strip('"').strip("'") for v in value[1:-1].split(",")]
                     meta[key] = [i for i in items if i]
                 else:
                     meta[key] = value
+
+    # Flush final list block
+    if current_list_key and current_list:
+        meta[current_list_key] = current_list
 
     return meta, content
 
@@ -265,6 +304,9 @@ class SkillMeta:
     triggers: list[str] = field(default_factory=list)
     source: str = "user"
     file_path: Path | None = None
+    category: str = ""
+    command: str = ""
+    tools: list[dict] = field(default_factory=list)
     _l2_cache: str | None = field(default=None, repr=False)
 
     def matches(self, query: str) -> float:
@@ -324,6 +366,11 @@ class UnifiedSkillRegistry:
         if builtin_dir.is_dir():
             count += self._scan_dir(builtin_dir, source="builtin")
 
+        # Source 1.5: src/mdpilot/skills/ (user-facing slash commands)
+        skills_dir = Path(__file__).resolve().parent.parent / "skills"
+        if skills_dir.is_dir():
+            count += self._scan_dir(skills_dir, source="skill")
+
         # Source 2: project-level .mdpilot/skills/
         project_skills = Path.cwd() / ".mdpilot" / "skills"
         if project_skills.is_dir():
@@ -374,6 +421,12 @@ class UnifiedSkillRegistry:
         if isinstance(triggers, str):
             triggers = [t.strip() for t in triggers.split(",")]
 
+        category = meta_dict.get("category", "")
+        command = meta_dict.get("command", "")
+        tools = meta_dict.get("tools", [])
+        if not isinstance(tools, list):
+            tools = []
+
         return SkillMeta(
             name=name,
             title=title,
@@ -382,6 +435,9 @@ class UnifiedSkillRegistry:
             triggers=triggers,
             source=source,
             file_path=path,
+            category=category,
+            command=command,
+            tools=tools,
         )
 
     def list_skills(self) -> list[SkillMeta]:

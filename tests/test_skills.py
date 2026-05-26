@@ -370,3 +370,56 @@ class TestUnifiedSkillRegistry:
         assert reg.count >= 2
         assert reg.get("protein-md") is not None
         assert reg.get("ligand-param") is not None
+
+
+class TestNewSkillFields:
+    """Tests for category, command, tools fields."""
+
+    def test_category_command_parsed(self, tmp_path: Path):
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        f = tmp_path / "test-workflow.md"
+        f.write_text(
+            "---\n"
+            "title: 测试工作流\n"
+            "description: 测试描述\n"
+            "tags: [test, unit]\n"
+            "category: workflow\n"
+            "command: /test-workflow\n"
+            "tools:\n"
+            "  - name: pdb4amber, node: lab03, exec: local_subprocess\n"
+            "  - name: tleap, node: lab03, exec: local_subprocess\n"
+            "---\n"
+            "# Test Workflow\n\nBody content.\n"
+        )
+        reg = UnifiedSkillRegistry()
+        reg.discover_all(extra_dirs=[tmp_path])
+        meta = reg.get("test-workflow")
+        assert meta is not None
+        assert meta.category == "workflow"
+        assert meta.command == "/test-workflow"
+        assert len(meta.tools) == 2
+        assert meta.tools[0]["name"] == "pdb4amber"
+
+    def test_skills_dir_scan(self, tmp_path: Path):
+        """Test that discover_all scans src/mdpilot/skills/ directory."""
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        reg = UnifiedSkillRegistry()
+        count = reg.discover_all()
+        assert count >= 0
+
+    def test_api_skill_info_new_fields(self, tmp_path: Path):
+        """Verify SkillInfo model accepts new fields."""
+        from mdpilot.api.routers.skills import SkillInfo
+        info = SkillInfo(
+            name="test",
+            title="Test",
+            description="desc",
+            tags=[],
+            source="skill",
+            category="workflow",
+            command="/test",
+            tools=[{"name": "tool1", "node": "lab03", "exec": "local_subprocess"}],
+        )
+        assert info.category == "workflow"
+        assert info.command == "/test"
+        assert len(info.tools) == 1

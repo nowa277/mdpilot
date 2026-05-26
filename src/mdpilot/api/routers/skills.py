@@ -1,5 +1,5 @@
 """Skills discovery API."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
 
 from mdpilot.api.auth import verify_token
@@ -17,15 +17,23 @@ class SkillInfo(BaseModel):
     description: str
     tags: list[str]
     source: str
+    category: str = ""
+    command: str = ""
+    tools: list[dict] = []
 
 
 @router.get("", response_model=list[SkillInfo])
-async def list_skills() -> list[SkillInfo]:
+async def list_skills(category: str | None = Query(None)) -> list[SkillInfo]:
     """Return all registered skills (L1 metadata only)."""
     from mdpilot.agent.skills import UnifiedSkillRegistry
 
     reg = UnifiedSkillRegistry()
     reg.discover_all()
+    skills = reg.list_skills()
+
+    if category:
+        skills = [s for s in skills if s.category == category]
+
     return [
         SkillInfo(
             name=s.name,
@@ -33,6 +41,9 @@ async def list_skills() -> list[SkillInfo]:
             description=s.description,
             tags=s.tags,
             source=s.source,
+            category=s.category,
+            command=s.command,
+            tools=s.tools,
         )
-        for s in reg.list_skills()
+        for s in skills
     ]

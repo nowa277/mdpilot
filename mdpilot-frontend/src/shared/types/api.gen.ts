@@ -113,12 +113,21 @@ export interface NodeStatus {
   lastSeen: string;
 }
 
+export interface ToolRef {
+  name: string;
+  node: string;
+  exec: string;
+}
+
 export interface SkillInfo {
   name: string;
   title: string;
   description: string;
   tags: string[];
   source: string;
+  category: string;
+  command: string;
+  tools: ToolRef[];
 }
 
 export interface Settings {
