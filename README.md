@@ -21,7 +21,9 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 
 ---
 
-https://github.com/user-attachments/assets/placeholder-display_02.gif
+<p align="center">
+<img src="photos&videos/display_02.gif" alt="MDPilot Demo" width="720" />
+</p>
 
 ## Features
 
@@ -36,112 +38,52 @@ https://github.com/user-attachments/assets/placeholder-display_02.gif
 
 ## Architecture
 
-### System Overview
-
-```mermaid
-graph TB
-    subgraph Frontend ["React Frontend (Vite + Radix)"]
-        Chat["Chat Pane<br/>SSE Streaming"]
-        Workflow["Workflow Panel<br/>Tool Cards · Progress"]
-        Cluster["Cluster Monitor<br/>GPU Rings · Node Health"]
-    end
-
-    subgraph Backend ["FastAPI Backend"]
-        Router["Routers"]
-        Service["Services"]
-        Auth["Auth & Middleware"]
-    end
-
-    subgraph AgentLayer ["Agent Layer"]
-        Router2["AgentRouter + TaskClassifier"]
-        ReAct["ReAct Agent"]
-        PlanSolve["Plan-and-Solve Agent"]
-        Reflection["Reflection Agent"]
-        AgentBase["AgentBase<br/>LLM · Tools · Context · Budget"]
-    end
-
-    subgraph Tools ["Tool Registry (20+)"]
-        AMBER["AMBER Tools<br/>tleap · sander · pmemd<br/>cpptraj · antechamber"]
-        AF2["AlphaFold2"]
-        BR["BioReason"]
-        PDB["PDB Ops"]
-        Other["PROPKA · H++ · Bash<br/>SSH · Knowledge"]
-    end
-
-    subgraph Infra ["Infrastructure"]
-        Celery["Celery Workers"]
-        SSH["SSH Executor"]
-        Redis["Redis Broker"]
-        DB["SQLAlchemy 2.0<br/>Async ORM"]
-    end
-
-    Frontend -->|"SSE / REST / WS"| Backend
-    Backend --> AgentLayer
-    AgentLayer --> Tools
-    Tools --> Infra
-    Backend --> DB
-
-    Router2 --> ReAct & PlanSolve & Reflection
-    ReAct & PlanSolve & Reflection --> AgentBase
-```
-
-### Agent Internal Architecture
-
-```mermaid
-graph TB
-    subgraph AgentBase ["AgentBase — Shared Infrastructure"]
-        LLM["LLMCaller"]
-        TD["ToolDispatcher"]
-        CM["ContextManager"]
-        BT["BudgetTracker"]
-        SR["SkillRegistry"]
-        KI["KnowledgeInjector"]
-        CP["Checkpoint"]
-        DG["DependencyGraph"]
-        PE["ParallelExecutor"]
-        EC["ErrorClassifier"]
-        RC["RecoveryCoordinator"]
-        MON["Monitoring"]
-    end
-
-    subgraph Paradigms ["Paradigm Selection"]
-        TC["TaskClassifier"]
-    end
-
-    TC -->|"Simple tasks"| ReAct["ReAct<br/>Reason → Act → Observe"]
-    TC -->|"Multi-step workflows"| PS["Plan-and-Solve<br/>Decompose → Plan → Execute"]
-    TC -->|"Optimization"| Ref["Reflection<br/>Execute → Critique → Revise"]
-
-    ReAct & PS & Ref --> AgentBase
-```
-
-### Data Flow
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant Backend
-    participant Agent
-    participant Tools
-    participant HPC
-
-    User->>Frontend: Send message
-    Frontend->>Backend: POST /api/v1/agent/chat
-    Backend->>Agent: Route to paradigm
-
-    loop Agent Loop
-        Agent->>Agent: thinking
-        Agent->>Tools: tool_call
-        Tools->>HPC: Execute (SSH/Celery)
-        HPC-->>Tools: Result
-        Tools-->>Agent: tool_result
-        Agent-->>Frontend: SSE event (thinking/tool_call/tool_result)
-        Frontend-->>User: Live update
-    end
-
-    Agent-->>Frontend: SSE done
-    Frontend-->>User: Complete response
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                      React Frontend (Vite + Radix)                  │
+│                                                                     │
+│   Chat Pane          Workflow Panel         Cluster Monitor         │
+│   · SSE Streaming    · Tool Cards           · GPU Usage Rings       │
+│   · Markdown Render  · Progress Bars        · Node Health           │
+│   · Code Highlight   · AlphaFold2 Card      · Real-time WS          │
+└──────────────────────────────┬──────────────────────────────────────┘
+                               │  SSE / WebSocket / REST
+┌──────────────────────────────▼──────────────────────────────────────┐
+│                       FastAPI Backend                                │
+│                                                                     │
+│   Routers ─── Services ─── Auth ─── Middleware                       │
+│   · /agent/chat (SSE)                                               │
+│   · /bioreason/*  /alphafold2/*                                     │
+│   · /chats  /tasks  /health                                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                        Agent Layer                                   │
+│                                                                     │
+│   ┌───────────┐  ┌────────────────┐  ┌────────────┐                │
+│   │   ReAct   │  │ Plan-and-Solve │  │ Reflection │                │
+│   │ (simple)  │  │ (workflows)    │  │ (optimize) │                │
+│   └─────┬─────┘  └───────┬────────┘  └─────┬──────┘                │
+│         └────────────────┼──────────────────┘                       │
+│                AgentBase (shared infrastructure)                     │
+│                                                                     │
+│   LLMCaller · ToolDispatcher · ContextManager · BudgetTracker       │
+│   SkillRegistry · Checkpoint · DependencyGraph · ParallelExecutor   │
+│   KnowledgeInjector · ErrorClassifier · RecoveryCoordinator         │
+├─────────────────────────────────────────────────────────────────────┤
+│                       Tool Registry                                  │
+│                                                                     │
+│   AMBER ─ tleap · sander · pmemd · cpptraj · antechamber · pdb4amber│
+│   AlphaFold2 · BioReason · PDB (fetch/clean/info)                   │
+│   PROPKA · H++ · Bash · File Ops · SSH · Knowledge · Wizards       │
+├─────────────────────────────────────────────────────────────────────┤
+│                     Integrations                                     │
+│                                                                     │
+│   RemoteToolClient ── Celery Workers ── SSH Executor                │
+│   AlphaFold2 Client          BioReason Client                       │
+├─────────────────────────────────────────────────────────────────────┤
+│              Database (SQLAlchemy 2.0 Async ORM)                     │
+│                                                                     │
+│   Chat · Message · Task · AgentSession                              │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ## Agent Paradigms
@@ -154,9 +96,9 @@ sequenceDiagram
 
 The `AgentRouter` uses `TaskClassifier` to automatically select the optimal paradigm for each user request. Agents share a common `AgentBase` providing LLM calling, tool dispatch, context compression, budget tracking, error recovery, and skill loading.
 
-<div align="center">
+<p align="center">
 <img src="photos&videos/workflow_display.png" alt="Workflow Panel — Tool execution and progress tracking" width="720" />
-</div>
+</p>
 
 ## Tech Stack
 
@@ -344,12 +286,12 @@ pnpm dev
 
 ### Environment Variables
 
-| Variable               | Description               | Default                                    |
-|:-----------------------|:--------------------------|:-------------------------------------------|
-| `MDPILOT_API_KEY`      | LLM provider API key      | *Required*                                 |
-| `MDPILOT_BASE_URL`     | Custom API endpoint       | Provider default                           |
-| `MDPILOT_MODEL`        | LLM model name            | `claude-sonnet-4-20250514`                 |
-| `MDPILOT_DATABASE_URL` | Database connection string | `sqlite+aiosqlite:///./mdpilot.db`         |
+| Variable               | Description               | Default                            |
+|:-----------------------|:--------------------------|:-----------------------------------|
+| `MDPILOT_API_KEY`      | LLM provider API key      | *Required*                         |
+| `MDPILOT_BASE_URL`     | Custom API endpoint       | Provider default                   |
+| `MDPILOT_MODEL`        | LLM model name            | `claude-sonnet-4-20250514`         |
+| `MDPILOT_DATABASE_URL` | Database connection string | `sqlite+aiosqlite:///./mdpilot.db` |
 
 See `.env.example` for the complete list.
 
@@ -385,9 +327,9 @@ MDPilot executes simulations on remote HPC nodes via SSH:
 3. **Redis broker** — Serves as the Celery message broker connecting the backend to remote workers.
 4. **SSH executor** — Handles file transfer (SFTP) and command execution for AMBER simulations.
 
-<div align="center">
+<p align="center">
 <img src="photos&videos/cluster_display.png" alt="Cluster Monitor — GPU usage and node health" width="720" />
-</div>
+</p>
 
 ## Testing
 
