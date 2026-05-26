@@ -60,10 +60,10 @@ class AgentBase(ABC):
         # LLM caller with retry
         self._llm_caller = LLMCaller(self._llm)
 
-        # Skill registry
-        from mdpilot.agent.skills import SkillRegistry
-        self._skills = SkillRegistry()
-        self._load_skills()
+        # Skill registry (unified: builtin + user, L1/L2 progressive)
+        from mdpilot.agent.skills import UnifiedSkillRegistry
+        self._skills = UnifiedSkillRegistry()
+        self._skills.discover_all()
 
         # Conversation context
         system_prompt = self._build_system_prompt()
@@ -159,6 +159,7 @@ class AgentBase(ABC):
             "1. Use `search_knowledge` to find relevant documents\n"
             "2. Use `read_knowledge` to load detailed documentation\n"
             "3. Follow the guidance in the loaded documents\n\n"
+            "4. **Proactively** use these tools when you encounter domain-specific questions — do not wait to be told.\n\n"
             f"{knowledge_summary}\n\n"
             "## Protein Workflow Guidelines\n"
             "- Start from the user-provided sequence or file and verify inputs before launching long jobs.\n"
@@ -186,7 +187,7 @@ class AgentBase(ABC):
             "Reason step-by-step, use tools when needed, and provide clear, accurate responses.\n"
         )
 
-    def _inject_context(self, prompt: str) -> str:
+    def _inject_context(self, prompt: str, active_skills: list[str] | None = None) -> str:
         """Build enhanced context from skills and knowledge.
 
         Returns the context string. Caller decides how to use it.
@@ -194,7 +195,7 @@ class AgentBase(ABC):
         parts = []
 
         # Skill context (existing behavior)
-        skill_ctx = self._skills.build_context(prompt)
+        skill_ctx = self._skills.build_context(prompt, active_skills=active_skills)
         if skill_ctx:
             parts.append(skill_ctx)
 
@@ -254,13 +255,3 @@ class AgentBase(ABC):
         if not self._compressor.should_compress:
             return ""
         return "\n\n" + self._compressor.build_notes_text()
-
-    def _load_skills(self) -> None:
-        """Load skills from project and user skill directories."""
-        project_skills = Path.cwd() / ".mdpilot" / "skills"
-        if project_skills.is_dir():
-            self._skills.load_directory(project_skills)
-
-        user_skills = Path.home() / ".mdpilot" / "skills"
-        if user_skills.is_dir():
-            self._skills.load_directory(user_skills)

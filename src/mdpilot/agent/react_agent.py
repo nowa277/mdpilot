@@ -101,7 +101,7 @@ class ReActAgent(AgentBase):
     # ------------------------------------------------------------------
 
     async def _run_with_coordination(self, prompt: str, stream: bool = False) -> str:
-        injected = self._inject_context(prompt)
+        injected = self._inject_context(prompt, active_skills=getattr(self, '_active_skills', None))
         skill_ctx = self._inject_tool_skills(prompt)
         if injected or skill_ctx:
             enhanced = self._build_system_prompt()
@@ -170,7 +170,7 @@ class ReActAgent(AgentBase):
     # ------------------------------------------------------------------
 
     async def _run_legacy(self, prompt: str, stream: bool = False) -> str:
-        injected = self._inject_context(prompt)
+        injected = self._inject_context(prompt, active_skills=getattr(self, '_active_skills', None))
         skill_ctx = self._inject_tool_skills(prompt)
         comp_ctx = self._inject_compression_notes(prompt)
         if injected or skill_ctx or comp_ctx:
