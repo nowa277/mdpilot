@@ -20,6 +20,16 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
+<p align="center">
+  <a href="README.md">
+    <img src="https://img.shields.io/badge/English-✔️-blue?style=for-the-badge" alt="English" />
+  </a>
+  &nbsp;
+  <a href="README_CN.md">
+    <img src="https://img.shields.io/badge/中文-✔️-red?style=for-the-badge" alt="中文" />
+  </a>
+</p>
+
 
 <div align="center">
 
