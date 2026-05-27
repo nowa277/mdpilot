@@ -20,6 +20,8 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
+<div align="center">
+
 # MDPilot
 
 **AI-Powered Molecular Dynamics Assistant**
@@ -32,12 +34,12 @@
 [![BioReason](https://img.shields.io/badge/BioReason-goGPT-8B5CF6)](https://github.com/bowang-lab/BioReason-Pro)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
-An intelligent multi-agent system that automates AMBER molecular dynamics simulations,
-AlphaFold2 structure prediction, and bio-molecular reasoning through natural language interaction.
+<p><em>An intelligent multi-agent system that automates AMBER molecular dynamics simulations,
+AlphaFold2 structure prediction, and bio-molecular reasoning through natural language interaction.</em></p>
 
 [Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [API](#-api-overview)
 
-[English](README.md) · [简体中文](docs/README_CN.md)
+**[English](README.md) · [简体中文](README_CN.md)**
 
 </div>
 

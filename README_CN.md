@@ -20,17 +20,6 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
-<p align="center">
-  <a href="README.md">
-    <img src="https://img.shields.io/badge/English-✔️-blue?style=for-the-badge" alt="English" />
-  </a>
-  &nbsp;
-  <a href="README_CN.md">
-    <img src="https://img.shields.io/badge/中文-✔️-red?style=for-the-badge" alt="中文" />
-  </a>
-</p>
-
-
 <div align="center">
 
 # MDPilot
@@ -45,9 +34,11 @@
 [![BioReason](https://img.shields.io/badge/BioReason-goGPT-8B5CF6)](https://github.com/bowang-lab/BioReason-Pro)
 [![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
 
-智能多 Agent 系统，通过自然语言交互自动化 AMBER 分子动力学模拟、AlphaFold2 结构预测和生物分子推理。
+<p><em>智能多 Agent 系统，通过自然语言交互自动化 AMBER 分子动力学模拟、AlphaFold2 结构预测和生物分子推理。</em></p>
 
 [功能特性](#-功能特性) · [系统架构](#-系统架构) · [快速开始](#-快速开始) · [API 概览](#-api-概览)
+
+**[English](README.md) · [简体中文](README_CN.md)**
 
 </div>
 
