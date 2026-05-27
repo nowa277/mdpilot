@@ -45,7 +45,7 @@
 ---
 
 <p align="center">
-<video src="photos&videos/display_02.mp4" autoplay loop muted playsinline width="100%"></video>
+<img src="photos&videos/display_02.gif" alt="MDPilot 演示" width="100%" />
 </p>
 
 ## 功能特性

@@ -46,7 +46,7 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 ---
 
 <p align="center">
-<video src="photos&videos/display_02.mp4" autoplay loop muted playsinline width="100%"></video>
+<img src="photos&videos/display_02.gif" alt="MDPilot Demo" width="100%" />
 </p>
 
 ## Features
