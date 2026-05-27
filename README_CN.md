@@ -45,7 +45,7 @@
 ---
 
 <p align="center">
-<img src="photos&videos/display_02.gif" alt="MDPilot 演示" width="100%" />
+https://github.com/nowa277/mdpilot/releases/download/v0.1-demo/display_02.webm
 </p>
 
 ## 功能特性
