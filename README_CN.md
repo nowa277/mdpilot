@@ -45,7 +45,7 @@
 ---
 
 <p align="center">
-<img src="photos&videos/display_02.gif" alt="MDPilot 演示" width="720" />
+<img src="photos&videos/display_02.gif" alt="MDPilot 演示" width="100%" />
 </p>
 
 ## 功能特性
@@ -120,7 +120,7 @@
 `AgentRouter` 使用 `TaskClassifier` 为每个用户请求自动选择最优范式。所有 Agent 共享 `AgentBase` 基类，提供 LLM 调用、工具分发、上下文压缩、预算追踪、错误恢复和技能加载等功能。
 
 <p align="center">
-<img src="photos&videos/workflow_display.png" alt="工作流面板 — 工具执行与进度追踪" width="720" />
+<img src="photos&videos/workflow_display.png" alt="工作流面板 — 工具执行与进度追踪" width="100%" />
 </p>
 
 ## 技术栈
@@ -351,7 +351,7 @@ MDPilot 通过 SSH 在远程 HPC 节点上执行模拟：
 4. **SSH Executor** — 处理文件传输（SFTP）和命令执行，用于 AMBER 模拟。
 
 <p align="center">
-<img src="photos&videos/cluster_display.png" alt="集群监控 — GPU 使用率与节点健康状态" width="720" />
+<img src="photos&videos/cluster_display.png" alt="集群监控 — GPU 使用率与节点健康状态" width="100%" />
 </p>
 
 ## 测试

@@ -46,7 +46,7 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 ---
 
 <p align="center">
-<img src="photos&videos/display_02.gif" alt="MDPilot Demo" width="720" />
+<img src="photos&videos/display_02.gif" alt="MDPilot Demo" width="100%" />
 </p>
 
 ## Features
@@ -121,7 +121,7 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 The `AgentRouter` uses `TaskClassifier` to automatically select the optimal paradigm for each user request. Agents share a common `AgentBase` providing LLM calling, tool dispatch, context compression, budget tracking, error recovery, and skill loading.
 
 <p align="center">
-<img src="photos&videos/workflow_display.png" alt="Workflow Panel — Tool execution and progress tracking" width="720" />
+<img src="photos&videos/workflow_display.png" alt="Workflow Panel — Tool execution and progress tracking" width="100%" />
 </p>
 
 ## Tech Stack
@@ -352,7 +352,7 @@ MDPilot executes simulations on remote HPC nodes via SSH:
 4. **SSH executor** — Handles file transfer (SFTP) and command execution for AMBER simulations.
 
 <p align="center">
-<img src="photos&videos/cluster_display.png" alt="Cluster Monitor — GPU usage and node health" width="720" />
+<img src="photos&videos/cluster_display.png" alt="Cluster Monitor — GPU usage and node health" width="100%" />
 </p>
 
 ## Testing
