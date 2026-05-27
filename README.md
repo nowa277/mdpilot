@@ -46,7 +46,7 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 ---
 
 <p align="center">
-https://github.com/nowa277/mdpilot/releases/download/v0.1-demo/display_02.webm
+<img src="photos&videos/display_02.gif" alt="MDPilot Demo" width="100%" />
 </p>
 
 ## Features
