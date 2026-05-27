@@ -52,6 +52,8 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 
 </div>
 
+[English](README.md) · [简体中文](docs/README_CN.md)
+
 ---
 
 <p align="center">
