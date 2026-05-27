@@ -40,8 +40,20 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
   }, [value]);
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (slashFilter !== null && ['ArrowUp', 'ArrowDown', 'Tab'].includes(e.key)) {
+    if (slashFilter !== null && e.key === 'Enter') {
+      // If the command part is complete (value has a space), submit
+      if (value.includes(' ')) {
+        e.preventDefault();
+        e.stopPropagation();
+        submit();
+        return;
+      }
+      // Bare command like /force-field — there's no text after the command,
+      // so submit directly with the fallback content instead of letting
+      // SlashCommandMenu select the skill (which just inserts text back)
       e.preventDefault();
+      e.stopPropagation();
+      submit();
       return;
     }
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -55,7 +67,8 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
     if (!trimmed || isStreaming) return;
     const { command, prompt } = parseSlashCommand(trimmed);
     const skills = command ? [command] : undefined;
-    onSubmit(prompt || trimmed, skills);
+    const content = prompt || (command ? '请执行该技能' : trimmed);
+    onSubmit(content, skills);
     setValue('');
     setSlashFilter(null);
     setPanelOpen(false);
@@ -63,6 +76,13 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
 
   function handleSkillSelect(skill: SkillInfo) {
     setValue(skill.command + ' ');
+    setSlashFilter(null);
+    setPanelOpen(false);
+    textareaRef.current?.focus();
+  }
+
+  function handleTabComplete(text: string) {
+    setValue(text);
     setSlashFilter(null);
     setPanelOpen(false);
     textareaRef.current?.focus();
@@ -80,6 +100,7 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
               mode="slash"
               filter={slashFilter}
               onSelect={handleSkillSelect}
+              onTabComplete={handleTabComplete}
               onClose={() => setSlashFilter(null)}
             />
           )}
