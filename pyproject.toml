@@ -9,7 +9,7 @@ description = "AMBER molecular dynamics simulation agent runtime"
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.10"
-authors = [{ name = "MDPilot team" }]
+authors = [{ name = "nowa277" }]
 dependencies = [
     "litellm>=1.40",
     "pydantic>=2.0",
