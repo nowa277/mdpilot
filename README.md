@@ -20,19 +20,6 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
-<p align="center">
-  <a href="README.md">
-    <img src="https://img.shields.io/badge/English-✔️-blue?style=for-the-badge" alt="English" />
-  </a>
-  &nbsp;
-  <a href="README_CN.md">
-    <img src="https://img.shields.io/badge/中文-✔️-red?style=for-the-badge" alt="中文" />
-  </a>
-</p>
-
-
-<div align="center">
-
 # MDPilot
 
 **AI-Powered Molecular Dynamics Assistant**
@@ -50,9 +37,9 @@ AlphaFold2 structure prediction, and bio-molecular reasoning through natural lan
 
 [Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [API](#-api-overview)
 
-</div>
-
 [English](README.md) · [简体中文](docs/README_CN.md)
+
+</div>
 
 ---
 
