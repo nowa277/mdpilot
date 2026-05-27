@@ -20,6 +20,10 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
+<p align="center">
+  <img src="photos&videos/photo_2026-05-27_08-57-53.jpg" alt="MDPilot" width="100%" />
+</p>
+
 <div align="center">
 
 # MDPilot
@@ -37,7 +41,7 @@
 <p><em>An intelligent multi-agent system that automates AMBER molecular dynamics simulations,
 AlphaFold2 structure prediction, and bio-molecular reasoning through natural language interaction.</em></p>
 
-[Features](#-features) · [Architecture](#-architecture) · [Quick Start](#-quick-start) · [API](#-api-overview)
+[Features](#features) · [Architecture](#architecture) · [Quick Start](#quick-start) · [API](#api-overview)
 
 **[English](README.md) · [简体中文](README_CN.md)**
 

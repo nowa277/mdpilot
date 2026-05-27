@@ -20,6 +20,10 @@
 
 <!-- DREAMFIELD_README_HEADER_END -->
 
+<p align="center">
+  <img src="photos&videos/photo_2026-05-27_08-57-53.jpg" alt="MDPilot" width="100%" />
+</p>
+
 <div align="center">
 
 # MDPilot
@@ -36,7 +40,7 @@
 
 <p><em>智能多 Agent 系统，通过自然语言交互自动化 AMBER 分子动力学模拟、AlphaFold2 结构预测和生物分子推理。</em></p>
 
-[功能特性](#-功能特性) · [系统架构](#-系统架构) · [快速开始](#-快速开始) · [API 概览](#-api-概览)
+[功能特性](#功能特性) · [系统架构](#系统架构) · [快速开始](#快速开始) · [API 概览](#api-概览)
 
 **[English](README.md) · [简体中文](README_CN.md)**
 
