@@ -152,7 +152,6 @@ class AgentService:
         """Execute task and stream events in real-time with concurrency control"""
         async with self._concurrent_limit:
             agent = await self.get_or_create_agent(session_id, prompt=prompt)
-            agent._active_skills = active_skills
             event_queue = asyncio.Queue()
 
             # Per-session orchestrator — no shared state between sessions
@@ -195,7 +194,8 @@ class AgentService:
 
             task = asyncio.create_task(
                 agent.run(prompt, stream=True, mode=mode,
-                          manual_queue=manual_queue, enabled_tools=enabled_tools)
+                          manual_queue=manual_queue, enabled_tools=enabled_tools,
+                          active_skills=active_skills)
             )
             try:
                 while not task.done():

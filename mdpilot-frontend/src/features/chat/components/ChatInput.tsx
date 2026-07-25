@@ -1,7 +1,9 @@
 import { Button } from '@shared/ui';
 import { cn } from '@shared/utils';
 import { type KeyboardEvent, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SlashCommandMenu } from './SlashCommandMenu';
+import { fetchSkills } from '../api/chats.api';
 import type { SkillInfo } from '@shared/types/api.gen';
 
 interface Props {
@@ -23,6 +25,12 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
   const [slashFilter, setSlashFilter] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const { data: skills = [] } = useQuery({
+    queryKey: ['skills'],
+    queryFn: fetchSkills,
+    staleTime: 60_000,
+  });
 
   useEffect(() => {
     const ta = textareaRef.current;
@@ -67,11 +75,29 @@ export function ChatInput({ disabled, isStreaming, onSubmit, onStop }: Props) {
     if (!trimmed || isStreaming) return;
     const { command, prompt } = parseSlashCommand(trimmed);
     const skills = command ? [command] : undefined;
-    const content = prompt || (command ? '请执行该技能' : trimmed);
+    let content: string;
+    if (prompt) {
+      content = prompt;
+    } else if (command) {
+      const skillInfo = skills_cache[command];
+      content = skillInfo
+        ? `执行 ${command} 技能：${skillInfo.description}`
+        : `执行 ${command} 技能`;
+    } else {
+      content = trimmed;
+    }
     onSubmit(content, skills);
     setValue('');
     setSlashFilter(null);
     setPanelOpen(false);
+  }
+
+  const skills_cache: Record<string, SkillInfo> = {};
+  for (const s of skills) {
+    if (s.command) {
+      const cmd = s.command.replace(/^\//, '');
+      skills_cache[cmd] = s;
+    }
   }
 
   function handleSkillSelect(skill: SkillInfo) {

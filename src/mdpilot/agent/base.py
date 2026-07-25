@@ -138,12 +138,31 @@ class AgentBase(ABC):
         """Execute a single tool call via the dispatcher."""
         return await self._dispatcher.execute(tool_call)
 
-    def _build_system_prompt(self) -> str:
+    def _build_system_prompt(self, *, active_skills: list[str] | None = None) -> str:
         """Compose the system prompt from configuration."""
         try:
             knowledge_summary = get_knowledge_index_summary()
         except Exception:
             knowledge_summary = "# Knowledge Base (unavailable)\n"
+
+        has_skills = bool(active_skills)
+
+        knowledge_section = (
+            "## Knowledge Base\n"
+            "You have access to a comprehensive AMBER knowledge base with detailed documentation.\n"
+            "When you need specific information about tools, concepts, or workflows:\n"
+            "1. Use `search_knowledge` to find relevant documents\n"
+            "2. Use `read_knowledge` to load detailed documentation\n"
+            "3. Follow the guidance in the loaded documents\n\n"
+        )
+        if not has_skills:
+            knowledge_section += (
+                "4. **Proactively** use these tools when you encounter domain-specific questions — do not wait to be told.\n\n"
+            )
+        else:
+            knowledge_section += (
+                "4. When skill knowledge is pre-loaded (see below), prefer using that content directly.\n\n"
+            )
 
         return (
             "You are MDPilot, an AI agent for protein structure prediction, functional reasoning, and molecular simulation workflows.\n"
@@ -153,14 +172,8 @@ class AgentBase(ABC):
             "- For actionable tasks: create a short plan, then execute it step by step with tools.\n"
             "- Prefer the project workflow: validate/clean protein sequence → AlphaFold2 structure prediction → BioReason functional/mechanistic reasoning → summarize outputs.\n"
             "- Always explain what you're doing and why, before and after running tools.\n\n"
-            "## Knowledge Base\n"
-            "You have access to a comprehensive AMBER knowledge base with detailed documentation.\n"
-            "When you need specific information about tools, concepts, or workflows:\n"
-            "1. Use `search_knowledge` to find relevant documents\n"
-            "2. Use `read_knowledge` to load detailed documentation\n"
-            "3. Follow the guidance in the loaded documents\n\n"
-            "4. **Proactively** use these tools when you encounter domain-specific questions — do not wait to be told.\n\n"
-            f"{knowledge_summary}\n\n"
+            + knowledge_section
+            + f"{knowledge_summary}\n\n"
             "## Protein Workflow Guidelines\n"
             "- Start from the user-provided sequence or file and verify inputs before launching long jobs.\n"
             "- Use AlphaFold2 before BioReason when structure context is needed.\n"

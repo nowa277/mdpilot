@@ -14,14 +14,14 @@
 [![AMBER](https://img.shields.io/badge/AMBER-24-orange?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48dGV4dCB4PSIyIiB5PSIxMiIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiPkE8L3RleHQ+PC9zdmc+)](https://ambermd.org)
 [![AlphaFold2](https://img.shields.io/badge/AlphaFold2-2.4+-4285F4?logo=google&logoColor=white)](https://github.com/google-deepmind/alphafold)
 [![BioReason](https://img.shields.io/badge/BioReason-goGPT-8B5CF6)](https://github.com/bowang-lab/BioReason-Pro)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![License](project/MDPilot/reference/claurst/LICENSE.md)
 
 <p><em>An intelligent multi-agent system that automates AMBER molecular dynamics simulations,
 AlphaFold2 structure prediction, and bio-molecular reasoning through natural language interaction.</em></p>
 
 [Features](#features) · [Architecture](#architecture) · [Quick Start](#quick-start) · [API](#api-overview)
 
-**[English](README.md) · [简体中文](README_CN.md)**
+**[English](project/MDPilot/README.md) · [简体中文](README_CN.md)**
 
 </div>
 
@@ -373,5 +373,5 @@ MDPilot builds on the following open-source projects and services:
 
 ## License
 
-[Apache-2.0](LICENSE)
+[Apache-2.0](project/MDPilot/reference/claurst/LICENSE.md)
 

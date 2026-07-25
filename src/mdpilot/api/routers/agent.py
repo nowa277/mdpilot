@@ -241,9 +241,12 @@ async def stream_agent_task(
         chat_service = ChatService(db_session)
         iteration_count = 0
         try:
+            display_content = request.prompt
+            if request.active_skills:
+                display_content = f"/{request.active_skills[0]} {request.prompt}".strip()
             await chat_service.add_message(
                 session_id=request.session_id,
-                content=request.prompt,
+                content=display_content,
                 role="user",
             )
             await db_session.commit()

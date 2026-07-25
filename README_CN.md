@@ -36,13 +36,13 @@
 [![AMBER](https://img.shields.io/badge/AMBER-24-orange?logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2Ij48dGV4dCB4PSIyIiB5PSIxMiIgZm9udC1zaXplPSIxMiIgZmlsbD0id2hpdGUiPkE8L3RleHQ+PC9zdmc+)](https://ambermd.org)
 [![AlphaFold2](https://img.shields.io/badge/AlphaFold2-2.4+-4285F4?logo=google&logoColor=white)](https://github.com/google-deepmind/alphafold)
 [![BioReason](https://img.shields.io/badge/BioReason-goGPT-8B5CF6)](https://github.com/bowang-lab/BioReason-Pro)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE)
+[![License](project/MDPilot/reference/claurst/LICENSE.md)
 
 <p><em>智能多 Agent 系统，通过自然语言交互自动化 AMBER 分子动力学模拟、AlphaFold2 结构预测和生物分子推理。</em></p>
 
 <a href="#功能特性">功能特性</a> · <a href="#系统架构">系统架构</a> · <a href="#快速开始">快速开始</a> · <a href="#api-概览">API 概览</a>
 
-**[English](README.md) · [简体中文](README_CN.md)**
+**[English](project/MDPilot/README.md) · [简体中文](README_CN.md)**
 
 </div>
 
@@ -394,4 +394,4 @@ MDPilot 基于以下开源项目和服务构建：
 
 ## 许可证
 
-[Apache-2.0](LICENSE)
+[Apache-2.0](project/MDPilot/reference/claurst/LICENSE.md)

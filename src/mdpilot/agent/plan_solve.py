@@ -43,20 +43,34 @@ class PlanAndSolveAgent(AgentBase):
         mode: str = "agent",
         manual_queue: list[dict] | None = None,
         enabled_tools: list[str] | None = None,
+        active_skills: list[str] | None = None,
     ) -> str:
         """Execute plan-and-solve loop."""
         # Inject skill and knowledge context
-        injected = self._inject_context(prompt)
+        injected = self._inject_context(prompt, active_skills=active_skills)
         skill_ctx = self._inject_tool_skills(prompt)
         comp_ctx = self._inject_compression_notes(prompt)
+
+        skill_instruction = ""
+        if active_skills and injected:
+            skill_instruction = (
+                "\n\n## Important: Pre-loaded Knowledge\n"
+                "The knowledge above has been pre-loaded for this query. "
+                "Use the injected content as your primary source. "
+                "Only call search_knowledge or read_knowledge if the user's question "
+                "covers a topic NOT addressed by the injected content.\n"
+            )
+
         if injected or skill_ctx or comp_ctx:
-            enhanced = self._build_system_prompt()
+            enhanced = self._build_system_prompt(active_skills=active_skills)
             if injected:
                 enhanced += "\n\n" + injected
             if skill_ctx:
                 enhanced += "\n\n" + skill_ctx
             if comp_ctx:
                 enhanced += comp_ctx
+            if skill_instruction:
+                enhanced += skill_instruction
             self._context.update_system_prompt(enhanced)
 
         self._context.add(role="user", content=prompt)

@@ -1,0 +1,39 @@
+# MDPilot Configuration
+
+# SSH connection settings for remote compute nodes
+ssh:
+  alphafold2:
+    host: ${ALPHAFOLD2_HOST:-lab02}
+    port: ${ALPHAFOLD2_PORT:-22}
+    username: ${ALPHAFOLD2_USER:-user}
+    key_file: ${ALPHAFOLD2_KEY:-~/.ssh/id_rsa}
+  
+  bioreason:
+    host: ${BIOREASON_HOST:-lab06}
+    port: ${BIOREASON_PORT:-22}
+    username: ${BIOREASON_USER:-user}
+    key_file: ${BIOREASON_KEY:-~/.ssh/id_rsa}
+
+# Celery broker settings
+celery:
+  alphafold2:
+    broker_url: ${ALPHAFOLD2_BROKER:-redis://lab02:6379/0}
+    result_backend: ${ALPHAFOLD2_BACKEND:-redis://lab02:6379/0}
+    task_timeout: ${ALPHAFOLD2_TIMEOUT:-3600}
+  
+  bioreason:
+    broker_url: ${BIOREASON_BROKER:-redis://lab06:6379/0}
+    result_backend: ${BIOREASON_BACKEND:-redis://lab06:6379/0}
+    task_timeout: ${BIOREASON_TIMEOUT:-1800}
+
+# Output directories (remote server paths)
+output:
+  base_dir: ${MDPILOT_OUTPUT_DIR:-./mdpilot_output}
+  alphafold2_dir: ${ALPHAFOLD2_OUTPUT_DIR:-/home/2-BB/changeshengjie/project/mdpilot/output}
+  bioreason_dir: ${BIOREASON_OUTPUT_DIR:-/home/6-FF/changshenjie/project/mdpilot/output}
+
+# Logging configuration
+logging:
+  level: ${LOG_LEVEL:-INFO}
+  format: ${LOG_FORMAT:-"%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+  file: ${LOG_FILE:-}

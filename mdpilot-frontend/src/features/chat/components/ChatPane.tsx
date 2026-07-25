@@ -24,12 +24,17 @@ export function ChatPane({ chatId }: Props) {
     (content: string, activeSkills?: string[]) => {
       const trimmed = content.trim();
       if (!trimmed) return;
+
+      const displayContent = activeSkills?.length
+        ? `/${activeSkills[0]} ${trimmed}`
+        : trimmed;
+
       const id: MessageId = `local-${crypto.randomUUID()}`;
       const userMsg: ChatMessage = {
         id,
         chatId,
         role: 'user',
-        content: trimmed,
+        content: displayContent,
         createdAt: new Date().toISOString(),
       };
       qc.setQueryData<{ items: ChatMessage[]; nextCursor: string | null }>(

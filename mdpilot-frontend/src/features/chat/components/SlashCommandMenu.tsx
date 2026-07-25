@@ -15,10 +15,11 @@ interface Props {
   mode: 'slash' | 'panel';
   filter: string;
   onSelect: (skill: SkillInfo) => void;
+  onTabComplete?: (text: string) => void;
   onClose: () => void;
 }
 
-export function SlashCommandMenu({ mode, filter, onSelect, onClose }: Props) {
+export function SlashCommandMenu({ mode, filter, onSelect, onTabComplete, onClose }: Props) {
   const { data: skills = [] } = useQuery({
     queryKey: ['skills'],
     queryFn: fetchSkills,
@@ -63,9 +64,12 @@ export function SlashCommandMenu({ mode, filter, onSelect, onClose }: Props) {
       onClose();
     } else if (e.key === 'Tab') {
       e.preventDefault();
-      setHighlightIdx(i => (i + 1) % flatList.length);
+      const skill = flatList[highlightIdx];
+      if (skill && skill.command && onTabComplete) {
+        onTabComplete(skill.command + ' ');
+      }
     }
-  }, [flatList, highlightIdx, onSelect, onClose]);
+  }, [flatList, highlightIdx, onSelect, onTabComplete, onClose]);
 
   useEffect(() => {
     if (mode === 'slash') {

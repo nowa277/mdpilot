@@ -8,10 +8,13 @@ and matched against user queries for automatic routing.
 
 from __future__ import annotations
 
+import logging
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -444,7 +447,14 @@ class UnifiedSkillRegistry:
         return sorted(self._skills.values(), key=lambda s: s.name)
 
     def get(self, name: str) -> SkillMeta | None:
-        return self._skills.get(name)
+        result = self._skills.get(name)
+        if result is not None:
+            return result
+        # Fallback: match by command field (without leading /)
+        for skill in self._skills.values():
+            if skill.command and skill.command.lstrip("/") == name:
+                return skill
+        return None
 
     def load_l2(self, name: str) -> str | None:
         """Load full L2 content for a skill (cached after first load)."""
@@ -486,6 +496,7 @@ class UnifiedSkillRegistry:
 
         # Priority 1: active skills (forced injection)
         if active_names:
+            logger.info("build_context: active_skills=%s", list(active_names))
             active_parts: list[str] = []
             for name in active_names:
                 l2 = self.load_l2(name)
@@ -501,6 +512,9 @@ class UnifiedSkillRegistry:
                     active_parts.append(section)
                     total += len(section)
                     loaded_names.add(name)
+                    logger.info("build_context: skill injected '%s' (%d chars)", name, len(section))
+                else:
+                    logger.warning("build_context: skill '%s' not found (l2=%s, meta=%s)", name, bool(l2), bool(meta))
             if active_parts:
                 parts.append("## Active Skills\n\n" + "".join(active_parts))
 

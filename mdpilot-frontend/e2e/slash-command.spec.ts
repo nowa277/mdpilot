@@ -122,6 +122,26 @@ test.describe("MDPilot E2E — Slash Command Flows", () => {
     const textarea = page.locator("textarea").first();
     await expect(textarea).toBeVisible({ timeout: 10_000 });
 
+    // Track SSE tool_call events to verify list_knowledge is NOT called
+    const toolCalls: string[] = [];
+    page.on("response", async (resp) => {
+      const url = resp.url();
+      if (!url.includes("/agent/stream")) return;
+      try {
+        const body = await resp.text();
+        // Parse SSE lines for tool_call events
+        for (const line of body.split("\n")) {
+          if (!line.startsWith("data: ")) continue;
+          try {
+            const evt = JSON.parse(line.slice(6));
+            if (evt.type === "tool_call" && evt.data?.name) {
+              toolCalls.push(evt.data.name);
+            }
+          } catch { /* skip non-JSON lines */ }
+        }
+      } catch { /* ignore */ }
+    });
+
     // Send a prompt via slash command
     await textarea.fill("/force-field 推荐一个蛋白质模拟的力场");
     await textarea.press("Enter");
@@ -156,6 +176,13 @@ test.describe("MDPilot E2E — Slash Command Flows", () => {
         responseText?.includes("OL3");
       expect(knowsForceField).toBeTruthy();
     }
+
+    // Verify the agent did NOT call list_knowledge or search_knowledge
+    // (the injected content should have been used directly)
+    const knowledgeToolCalls = toolCalls.filter(
+      (name) => name === "list_knowledge" || name === "search_knowledge" || name === "read_knowledge"
+    );
+    expect(knowledgeToolCalls).toEqual([]);
   });
 
   test("ArrowDown/ArrowUp navigate menu, Escape closes", async ({ page }) => {
@@ -213,8 +240,10 @@ test.describe("MDPilot E2E — Slash Command Flows", () => {
     const userBubble = page.locator('[data-role="user"]').first();
     await expect(userBubble).toBeVisible({ timeout: 5_000 });
 
-    // The message should show "/force-field 请执行该技能"
+    // The message should show "/force-field" with a descriptive prompt
     const bubbleText = await userBubble.textContent();
     expect(bubbleText).toContain("/force-field");
+    // The fallback prompt should include the skill description, not "请执行该技能"
+    expect(bubbleText).toMatch(/力场|force.field/i);
   });
 });
